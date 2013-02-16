@@ -2,7 +2,7 @@
 /**
 	* @name   : Easy Options
 	* @author : takien
-	* @version: 1.0
+	* @version: 1.1
 	* @link   : http://takien.com
 	* 
  */
@@ -27,7 +27,7 @@ if(!class_exists('EasyOptions')) {
 	public function __construct() {
 		add_action('admin_init',array(&$this,'option_register_setting'));
 		add_action('admin_menu',array(&$this,'option_add_page'));
-		add_filter('takien_plugin_options_tabs',array(&$this,'option_tab'));
+		add_filter($this->option_menu_slug.'_tabs',array(&$this,'option_tab'));
 	}
 	
 	/* begin option stuff*/
@@ -101,7 +101,7 @@ if(!class_exists('EasyOptions')) {
 		$icon = $this->option_icon_big;?>
 		<div class="icon32"><img src="<?php echo $icon;?>" /></div>
 		<?php 
-			$navs = apply_filters('takien_plugin_options_tabs','');
+			$navs = apply_filters($this->option_menu_slug.'_tabs','');
 			if(!empty($navs)) {
 				echo '<h2 class="nav-tab-wrapper">';
 				if(is_array($navs)){
@@ -117,7 +117,7 @@ if(!class_exists('EasyOptions')) {
 			<h2><?php echo $this->option_menu_name;?></h2>
 		<?php } ?>
 		<?php
-			echo apply_filters('takien_plugin_option_'.$this->option_menu_slug.'_before_form','');
+			echo apply_filters('easy_option_'.$this->option_menu_slug.'_before_form','');
 		?>
 		<form method="post" action="options.php">
 			<?php 
@@ -134,7 +134,7 @@ if(!class_exists('EasyOptions')) {
 			<p><input type="submit" class="button-primary" value="Save" /> </p>
 		</form>
 		<?php 
-			echo apply_filters('takien_plugin_option_'.$this->option_menu_slug.'_after_form','');
+			echo apply_filters('easy_option_'.$this->option_menu_slug.'_after_form','');
 		?>
 		<?php /*<p>
 		To retrieve value in your theme, use <strong>&lt;?php echo theme_option('FIELD_NAME','<?php echo $this->option_group;?>');?&gt;</strong>, example: &lt;?php echo theme_option('facebook_page','<?php echo $this->option_group;?>');?&gt;</p>*/?>
@@ -162,6 +162,7 @@ if(!class_exists('EasyOptions')) {
 		foreach($fields as $field){
 			$field['rowclass'] = isset($field['rowclass']) ? $field['rowclass'] : false;
 			$field['name'] = $this->option_group.'['.$field['name'].']';
+			$field['attr'] = isset($field['attr']) ? $field['attr'] : '';
 			
 			if($field['type']=='text'){
 				$output .= '<tr '.($field['rowclass'] ? 'class="'.$field['rowclass'].'"': '').'><th><label for="'.$field['name'].'">'.$field['label'].'</label></th>';
