@@ -11,6 +11,7 @@ defined('ABSPATH') or die();
 if(!class_exists('EasyOptions')) {
 	class EasyOptions {
 
+
 	var $option_group;
 	var $option_menu_name;
 	var $option_menu_slug;
@@ -260,4 +261,11 @@ if (!function_exists('array_replace_recursive'))
     }
     return $array;
   }
+}
+
+function easy_options( $option='', $group = '' ) {
+	if( $option ) {
+		$opt = new EasyOptions;
+		return $opt->option( $option, $group );
+	}
 }
