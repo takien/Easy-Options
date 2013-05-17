@@ -2,7 +2,7 @@
 /**
 	* @name   : Easy Options
 	* @author : takien
-	* @version: 1.1
+	* @version: 1.2
 	* @link   : http://takien.com
 	* 
  */
@@ -165,6 +165,11 @@ if(!class_exists('EasyOptions')) {
 			$field['name'] = $this->option_group.'['.$field['name'].']';
 			$field['attr'] = isset($field['attr']) ? $field['attr'] : '';
 			
+			if($field['type']=='textarea'){
+					$output .= '<tr><th><label for="'.$field['name'].'">'.$field['label'].'</label></th>';
+					$output .= '<td style="vertical-align:top"><textarea style="width:400px;height:150px" id="'.$field['name'].'" name="'.$field['name'].'">'.esc_textarea($field['value']).'</textarea>';
+					$output .= ' <p class="description">'.$field['description'].'</p></td></tr>';
+			}
 			if($field['type']=='text'){
 				$output .= '<tr '.($field['rowclass'] ? 'class="'.$field['rowclass'].'"': '').'><th><label for="'.$field['name'].'">'.$field['label'].'</label></th>';
 				$output .= '<td><input class="regular-text" type="text" id="'.$field['name'].'" name="'.$field['name'].'" value="'.$field['value'].'" />';
