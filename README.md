@@ -114,6 +114,9 @@ Coming soon
 ## Screenshot
 Coming soon
 
+## Contribute
+To contribute, fork, edit and make pull request to this repo.
+
 ## Support
 Use contact form here http://takien.com/contact
 
