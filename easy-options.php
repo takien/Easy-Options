@@ -191,6 +191,11 @@ if(!class_exists('EasyOptions')) {
 			
 			$field['name'] = $this->group.'['.$field['name'].']';
 			
+			//dropdown pages
+			if($field['type'] == 'dropdown_pages') {
+				$field['values'] = $this->dropdown_pages();
+			}
+			
 			if($field['type']=='textarea'){
 					$output .= '<tr><th><label for="'.$field['name'].'">'.$field['label'].'</label></th>';
 					$output .= '<td style="vertical-align:top"><textarea style="width:400px;height:150px" id="'.$field['name'].'" name="'.$field['name'].'">'.esc_textarea($value).'</textarea>';
@@ -214,7 +219,7 @@ if(!class_exists('EasyOptions')) {
 				}
 				$output .= ' <p class="description">'.$field['description'].'</p></td></tr>';
 			}
-			if($field['type'] == 'select'){
+			if(($field['type'] == 'select') OR $field['type'] == 'dropdown_pages') {
 				$output .= '<tr '.($field['rowclass'] ? 'class="'.$field['rowclass'].'"': '').'><th><label>'.$field['label'].'</label></th>';
 				$output .= '<td>';
 				$output .= '<select style="min-width:200px" name="'.$field['name'].'">';
@@ -247,6 +252,20 @@ if(!class_exists('EasyOptions')) {
 		$output .= '</table>';
 		return $output;
 	}	
+	
+    /**
+     * Dropdown pages select
+	 * Since 1.3
+     */
+	function dropdown_pages(){
+		$args = Array();
+		$return = Array();
+		$pages = get_pages( $args );
+		foreach($pages as $k=>$v){
+			$return[$v->ID] = $v->post_title;
+		}
+		return $return;
+	}
 	
 	}
 }
