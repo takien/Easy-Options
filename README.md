@@ -36,7 +36,7 @@ $args = Array(
 	'menu_slug'         => 'my-settings', //required
 	'menu_location'     => 'add_menu_page', //menu location, see Menu Location section for more info
 	'icon_big'          => '', //URL to big icon image 32x32 px
-	'icon_small'        => '', //URL to small icon image 16x1px
+	'icon_small'        => '', //URL to small icon image 16x16 px
 );
 
 ```
