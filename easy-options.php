@@ -2,7 +2,7 @@
 /**
 	* @name   : Easy Options
 	* @author : takien
-	* @version: 1.2
+	* @version: 1.3
 	* @link   : http://takien.com
 	* 
  */
@@ -12,38 +12,46 @@ if(!class_exists('EasyOptions')) {
 	class EasyOptions {
 
 
-	var $option_group;
-	var $option_menu_name;
-	var $option_menu_slug;
-	var $option_fields          = Array();
-	var $option_default         = Array();
-	var $option_menu_location   = 'add_menu_page';
-	var $option_capability 	    = 'edit_theme_options';
-	var $option_parent_slug;
-	var $option_icon_small;
-	var $option_icon_big;
-	var $option_menu_position;
-	var $option_add_tab = false;
+	var $group           = '';
+	var $menu_name       = '';
+	var $menu_slug       = '';
+	var $fields          = Array();
+	var $default         = Array();
+	var $menu_location   = 'add_menu_page';
+	var $capability 	 = 'edit_theme_options';
+	var $parent_slug     = '';
+	var $icon_small      = '';
+	var $icon_big        = '';
+	var $menu_position   = '';
+	var $add_tab = false;
 
-	public function __construct() {
-		add_action('admin_init',array(&$this,'option_register_setting'));
-		add_action('admin_menu',array(&$this,'option_add_page'));
-		add_filter($this->option_menu_slug.'_tabs',array(&$this,'option_tab'));
+
+	public function __construct($args=array()) {
+		add_action('admin_init',array(&$this,'register_setting'));
+		add_action('admin_menu',array(&$this,'add_page'));
+		
+		foreach($args as $key=>$val) {
+			
+			if(isset($this->$key)) {
+				$this->$key = $val;
+			}
+		}
+		add_filter($this->tab_nav(),array(&$this,'tab'));
+		
 	}
 	
-	/* begin option stuff*/
-	
+
 	/*register setting*/
-	function option_register_setting() {
-		register_setting($this->option_menu_slug.'_option_field', $this->option_group);
+	function register_setting() {
+		register_setting($this->menu_slug.'_option_field', $this->group);
 	}
 	
 	/*option*/
 	function option($key='',$group=''){
-		$group = $group ? $group : $this->option_group;
+		$group = $group ? $group : $this->group;
 		$option = get_option($group) ? get_option($group) : Array();
-		//$option = array_merge($this->option_default,$option);
-		$option = array_replace_recursive($option,$this->option_default,$option);
+		//$option = array_merge($this->default,$option);
+		$option = array_replace_recursive($option,$this->default,$option);
 
 		$return = false;
 		if($key){
@@ -58,7 +66,7 @@ if(!class_exists('EasyOptions')) {
 	}
 	
 	/*add page*/
-	function option_add_page(){
+	function add_page(){
 		
 		$top_menu = Array(
 			'add_menu_page', //$page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $position 
@@ -79,30 +87,31 @@ if(!class_exists('EasyOptions')) {
 			'add_options_page'  
 		);
 		
-		if(in_array($this->option_menu_location,$top_menu)){
-			call_user_func($this->option_menu_location, $this->option_menu_name, $this->option_menu_name, $this->option_capability, $this->option_menu_slug, array(&$this,'option_page'), $this->option_icon_small, $this->option_menu_position);
+		if(in_array($this->menu_location,$top_menu)){
+			call_user_func($this->menu_location, $this->menu_name, $this->menu_name, $this->capability, $this->menu_slug, array(&$this,'page'), $this->icon_small, $this->menu_position);
 		}
-		else if (in_array($this->option_menu_location,$specific_sub_menu)){
-			call_user_func($this->option_menu_location,$this->option_menu_name, $this->option_menu_name, $this->option_capability, $this->option_menu_slug, array(&$this,'option_page'));
+		else if (in_array($this->menu_location,$specific_sub_menu)){
+			call_user_func($this->menu_location,$this->menu_name, $this->menu_name, $this->capability, $this->menu_slug, array(&$this,'page'));
 		}
-		else if(strpos($this->option_menu_location,'post_type') === 0){
-			$post_type = end(explode('=',$this->option_menu_location));
-			add_submenu_page( "edit.php?post_type=$post_type", $this->option_menu_name, $this->option_menu_name, $this->option_capability, $this->option_menu_slug,  array(&$this,'option_page') );
+		else if(strpos($this->menu_location,'post_type') === 0){
+			$post_type = end(explode('=',$this->menu_location));
+			add_submenu_page( "edit.php?post_type=$post_type", $this->menu_name, $this->menu_name, $this->capability, $this->menu_slug,  array(&$this,'page') );
 		}
 		else  {
 			if($this->parent_slug) {
-				add_submenu_page( $this->parent_slug, $this->option_menu_name, $this->option_menu_name, $this->option_capability, $this->option_menu_slug,  array(&$this,'option_page') );
+				add_submenu_page( $this->parent_slug, $this->menu_name, $this->menu_name, $this->capability, $this->menu_slug,  array(&$this,'page') );
 			}
 		}
 		
 	}
-	function option_page(){ ?>
+	function page(){ ?>
 	<div class="wrap">
 		<?php 
-		$icon = $this->option_icon_big;?>
+		$icon = $this->icon_big;?>
 		<div class="icon32"><img src="<?php echo $icon;?>" /></div>
 		<?php 
-			$navs = apply_filters($this->option_menu_slug.'_tabs','');
+
+			$navs = apply_filters($this->tab_nav(),'');
 			if(!empty($navs)) {
 				echo '<h2 class="nav-tab-wrapper">';
 				if(is_array($navs)){
@@ -115,76 +124,93 @@ if(!class_exists('EasyOptions')) {
 			}
 			else {
 			?>
-			<h2><?php echo $this->option_menu_name;?></h2>
-		<?php } ?>
-		<?php
-			echo apply_filters('easy_option_'.$this->option_menu_slug.'_before_form','');
+			<h2><?php echo $this->menu_name;?></h2>
+		<?php } 
+			if(isset($_GET['settings-updated'])) { ?>
+			<div id="setting-error-settings_updated" class="updated settings-error"> 
+				<p><strong>Settings saved.</strong></p>
+			</div>
+			<?php }
+			echo apply_filters('easy_option_'.$this->menu_slug.'_before_form','');
 		?>
+		
 		<form method="post" action="options.php">
 			<?php 
 				wp_nonce_field('update-options'); 
-				settings_fields($this->option_menu_slug.'_option_field');?>
+				settings_fields($this->menu_slug.'_option_field');?>
 			<?php
-				if(!empty($this->option_fields)){
-					echo $this->option_form($this->option_fields);
+				if(!empty($this->fields)){
+					echo $this->form($this->fields);
 				}
 				
 			?>
 			<input type="hidden" name="action" value="update" />
-			<input type="hidden" name="<?php echo $this->option_menu_slug.'_option_field';?>" value="<?php echo $this->option_group;?>" />
+			<input type="hidden" name="<?php echo $this->menu_slug.'_option_field';?>" value="<?php echo $this->group;?>" />
 			<p><input type="submit" class="button-primary" value="Save" /> </p>
 		</form>
 		<?php 
-			echo apply_filters('easy_option_'.$this->option_menu_slug.'_after_form','');
+			echo apply_filters('easy_option_'.$this->menu_slug.'_after_form','');
 		?>
-		<?php /*<p>
-		To retrieve value in your theme, use <strong>&lt;?php echo theme_option('FIELD_NAME','<?php echo $this->option_group;?>');?&gt;</strong>, example: &lt;?php echo theme_option('facebook_page','<?php echo $this->option_group;?>');?&gt;</p>*/?>
+		<p>To retrieve value in your theme or plugin, use <code>&lt;?php echo easy_options('FIELD_NAME','<?php echo $this->group;?>');?&gt;</code>, example: <code>&lt;?php echo easy_options('facebook_page','<?php echo $this->group;?>');?&gt;</code></p>
 		
 	</div>
 	<?php
 	}
 	/*tab*/
-	function option_tab($tab){
-		if($this->option_add_tab) {
+	function tab($tab){
+		if($this->add_tab) {
 			$tab[] = array(
-			'slug'=>$this->option_menu_slug,
-			'name'=>$this->option_menu_name
+			'slug'=>$this->menu_slug,
+			'name'=>$this->menu_name
 			);
 		}
 		return $tab;
+	}
+	
+	/*
+	* Unique tab group name
+	*/
+	function tab_nav() {
+		return 'easy_options_tabs_'.md5($this->parent_slug ? $this->parent_slug : $this->menu_slug);
 	}
 	
 	/**
 	 * Render form
 	 * @param array 
 	 */	
-	private function option_form($fields){
+	private function form($fields){
 		$output ='<table class="form-table">';
 		foreach($fields as $field){
 			$field['rowclass'] = isset($field['rowclass']) ? $field['rowclass'] : false;
-			$field['name'] = $this->option_group.'['.$field['name'].']';
+			$value = $this->option($field['name']) ? $this->option($field['name']) : (isset($field['value']) ? $field['value'] : null);
 			$field['attr'] = isset($field['attr']) ? $field['attr'] : '';
+			
+			if ( $field['type']=='checkbox' ) {
+				$field['attr'] = $field['attr']. ' '.(($value) ? 'checked="checked"' : '');
+			}
+			
+			$field['name'] = $this->group.'['.$field['name'].']';
 			
 			if($field['type']=='textarea'){
 					$output .= '<tr><th><label for="'.$field['name'].'">'.$field['label'].'</label></th>';
-					$output .= '<td style="vertical-align:top"><textarea style="width:400px;height:150px" id="'.$field['name'].'" name="'.$field['name'].'">'.esc_textarea($field['value']).'</textarea>';
+					$output .= '<td style="vertical-align:top"><textarea style="width:400px;height:150px" id="'.$field['name'].'" name="'.$field['name'].'">'.esc_textarea($value).'</textarea>';
 					$output .= ' <p class="description">'.$field['description'].'</p></td></tr>';
 			}
 			if($field['type']=='text'){
 				$output .= '<tr '.($field['rowclass'] ? 'class="'.$field['rowclass'].'"': '').'><th><label for="'.$field['name'].'">'.$field['label'].'</label></th>';
-				$output .= '<td><input class="regular-text" type="text" id="'.$field['name'].'" name="'.$field['name'].'" value="'.$field['value'].'" />';
+				$output .= '<td><input class="regular-text" type="text" id="'.$field['name'].'" name="'.$field['name'].'" value="'.$value.'" />';
 				$output .= ' <p class="description">'.$field['description'].'</p></td></tr>';
 			}
 			if($field['type']=='checkbox'){
 				$output .= '<tr '.($field['rowclass'] ? 'class="'.$field['rowclass'].'"': '').'><th><label for="'.$field['name'].'">'.$field['label'].'</label></th>';
-				$output .= '<td><input type="hidden" name="'.$field['name'].'" value="" /><input type="checkbox" id="'.$field['name'].'" name="'.$field['name'].'" value="'.$field['value'].'" '.$field['attr'].' />';
+				$output .= '<td><input type="hidden" name="'.$field['name'].'" value="" /><input type="checkbox" id="'.$field['name'].'" name="'.$field['name'].'" value="1" '.$field['attr'].' />';
 				$output .= ' <p class="description">'.$field['description'].'</p></td></tr>';
 			}
 			if($field['type']=='checkboxgroup'){
 				$output .= '<tr '.($field['rowclass'] ? 'class="'.$field['rowclass'].'"': '').'><th><label>'.$field['grouplabel'].'</label></th>';
 				$output .= '<td>';
 				foreach($field['groupitem'] as $key=>$item){
-					$output .= '<input type="hidden" name="'.$item['name'].'" value="" /><input type="checkbox" id="'.$item['name'].'" name="'.$item['name'].'" value="'.$item['value'].'" '.$item['attr'].' /> <label for="'.$item['name'].'">'.$item['label'].'</label><br />';
+					$output .= '<input type="hidden" name="'.$item['name'].'" value="" /><input type="checkbox" id="'.$item['name'].'" name="'.$item['name'].'" value="1" '.$item['attr'].' /> <label for="'.$item['name'].'">'.$item['label'].'</label><br />';
 				}
 				$output .= ' <p class="description">'.$field['description'].'</p></td></tr>';
 			}
@@ -193,7 +219,7 @@ if(!class_exists('EasyOptions')) {
 				$output .= '<td>';
 				$output .= '<select style="min-width:200px" name="'.$field['name'].'">';
 				foreach( (array)$field['values'] as $val=>$name ) {
-					$output .= '<option '.(($val==$field['value']) ? 'selected="selected"' : '' ).' value="'.$val.'">'.$name.'</option>';
+					$output .= '<option '.(($val==$value) ? ' selected="selected" ' : '' ).' value="'.$val.'">'.$name.'</option>';
 				}
 				$output .= '</select>';
 				$output .= ' <p class="description">'.$field['description'].'</p></td></tr>';
@@ -208,7 +234,7 @@ if(!class_exists('EasyOptions')) {
 				
 				foreach ( $editable_roles as $role => $details ) {
 					$name = translate_user_role($details['name'] );
-					if ( $field['value'] == $role ) // preselect specified role
+					if ( $value == $role ) // preselect specified role
 					$p = "\n\t<option selected='selected' value='" . esc_attr($role) . "'>$name</option>";
 					else
 					$r .= "\n\t<option value='" . esc_attr($role) . "'>$name</option>";
