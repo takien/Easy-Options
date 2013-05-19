@@ -18,7 +18,7 @@ require_once('inc/easy-options.php')
 ?>
 ```
 
-### 2. Create argument array
+#### 2. Create argument array
 
 ```
 $args = Array(
