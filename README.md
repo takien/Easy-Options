@@ -3,6 +3,15 @@ Easy Options
 
 WordPress plugin options / theme options made easy. 
 
+## Features
+
+* Easy to use
+* Unlimited options page
+* Support tabbed options page
+* Custom icon
+* Various field types: `checkbox`, `checkboxgroup`, `text`, `textarea`, `dropdown_pages`.
+* Flexible menu location. Where you want to place the menu for options page is your choose.
+* Each option group is saved in one row of wp_options table, no wasting your database.
 
 
 ## Get Started
