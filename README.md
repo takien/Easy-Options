@@ -7,7 +7,7 @@ WordPress plugin options / theme options made easy.
 
 ## Get Started
 
-### 1. Include the script
+#### 1. Include the script
 
 * Upload `easy-options.php` to a folder under your theme/plugin directory, eg. under `/inc` folder
 * Include in your theme/plugin. If you use it for your theme, include it in `functions.php`
@@ -32,13 +32,13 @@ $args = Array(
 
 ```
 
-### 3. Call EasyOptions
+#### 3. Call EasyOptions
 
 ```
 $my_options   = new EasyOptions($args);
 ```
 
-### 4. Create Fields
+#### 4. Create Fields
 
 ```
 $my_options->fields = Array(
@@ -81,13 +81,13 @@ Array(
 // Other field type coming soon :D
 ```
 
-### 5. Done
+#### 5. Done
 
 Yes, you're just creating wonderfull Theme/Plugin option page easily.
 
 But wait! How do I retrieve those values in my theme/plugin? OK, keep reading.
 
-### 6. Retrieving Saved Options
+#### 6. Retrieving Saved Options
 
 To retrieve value in your theme or plugin, use `<?php echo easy_options('FIELD_NAME','your_option_group');?>`, 
 
