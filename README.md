@@ -1,4 +1,4 @@
-Easy Options
+Easy Options v1.3
 =====================
 
 WordPress plugin options / theme options made easy. 
