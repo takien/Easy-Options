@@ -115,7 +115,7 @@ Coming soon
 Coming soon
 
 ## Support
-Use contact form here http://takien.com/contect
+Use contact form here http://takien.com/contact
 
 ## Donate
 To donate this project, please visit http://takien.com/donate
