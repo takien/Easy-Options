@@ -106,3 +106,16 @@ Example to retrieve from your setup above, for twitter field.
 <?php 
 echo easy_options('twitter_username','my-settings-group');
 ?>
+```
+
+## More documentation
+Coming soon
+
+## Screenshot
+Coming soon
+
+## Support
+Use contact form here http://takien.com/contect
+
+## Donate
+To donate this project, please visit http://takien.com/donate
