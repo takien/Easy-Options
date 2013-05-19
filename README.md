@@ -115,7 +115,7 @@ Coming soon
 Coming soon
 
 ## Contribute
-To contribute, fork, edit and make pull request to this repo.
+To contribute, [fork](https://github.com/takien/Easy-Options/fork), make your change and make pull request to this repo.
 
 ## Support
 Use contact form here http://takien.com/contact
