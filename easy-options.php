@@ -22,7 +22,7 @@ if(!class_exists('EasyOptions')) {
 	var $parent_slug     = '';
 	var $icon_small      = '';
 	var $icon_big        = '';
-	var $menu_position   = '';
+	var $menu_position   = 100;
 	var $add_tab = false;
 
 
@@ -313,9 +313,11 @@ if (!function_exists('array_replace_recursive'))
   }
 }
 
-function easy_options( $option='', $group = '' ) {
-	if( $option ) {
-		$opt = new EasyOptions;
-		return $opt->option( $option, $group );
+if( !function_exists('easy_options') ) {
+	function easy_options( $option='', $group = '' ) {
+		if( $option ) {
+			$opt = new EasyOptions;
+			return $opt->option( $option, $group );
+		}
 	}
 }
