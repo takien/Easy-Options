@@ -22,7 +22,7 @@ if(!class_exists('EasyOptions')) {
 	var $parent_slug     = '';
 	var $icon_small      = '';
 	var $icon_big        = '';
-	var $menu_position   = 100;
+	var $menu_position   = 82;
 	var $add_tab = false;
 
 
