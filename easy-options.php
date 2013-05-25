@@ -2,7 +2,7 @@
 /**
 	* @name   : Easy Options
 	* @author : takien
-	* @version: 1.3
+	* @version: 1.3.1
 	* @link   : http://takien.com
 	* 
  */
