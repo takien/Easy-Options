@@ -14,6 +14,7 @@ if(!class_exists('EasyOptions')) {
 
 	var $group           = '';
 	var $menu_name       = '';
+	var $page_title      = '';
 	var $menu_slug       = '';
 	var $fields          = Array();
 	var $default         = Array();
@@ -22,7 +23,7 @@ if(!class_exists('EasyOptions')) {
 	var $parent_slug     = '';
 	var $icon_small      = '';
 	var $icon_big        = '';
-	var $menu_position   = 82;
+	var $menu_position   = 85;
 	var $add_tab = false;
 
 
@@ -36,6 +37,7 @@ if(!class_exists('EasyOptions')) {
 				$this->$key = $val;
 			}
 		}
+		$this->page_title = $this->page_title ? $this->page_title : $this->menu_name;
 		add_filter($this->tab_nav(),array(&$this,'tab'));
 		
 	}
@@ -86,20 +88,20 @@ if(!class_exists('EasyOptions')) {
 			'add_management_page', 
 			'add_options_page'  
 		);
-		
+
 		if(in_array($this->menu_location,$top_menu)){
-			call_user_func($this->menu_location, $this->menu_name, $this->menu_name, $this->capability, $this->menu_slug, array(&$this,'page'), $this->icon_small, $this->menu_position);
+			call_user_func($this->menu_location, $this->page_title, $this->menu_name, $this->capability, $this->menu_slug, array(&$this,'page'), $this->icon_small, $this->menu_position);
 		}
 		else if (in_array($this->menu_location,$specific_sub_menu)){
-			call_user_func($this->menu_location,$this->menu_name, $this->menu_name, $this->capability, $this->menu_slug, array(&$this,'page'));
+			call_user_func($this->menu_location,$this->page_title, $this->menu_name, $this->capability, $this->menu_slug, array(&$this,'page'));
 		}
 		else if(strpos($this->menu_location,'post_type') === 0){
 			$post_type = end(explode('=',$this->menu_location));
-			add_submenu_page( "edit.php?post_type=$post_type", $this->menu_name, $this->menu_name, $this->capability, $this->menu_slug,  array(&$this,'page') );
+			add_submenu_page( "edit.php?post_type=$post_type", $this->page_title, $this->menu_name, $this->capability, $this->menu_slug,  array(&$this,'page') );
 		}
 		else  {
 			if($this->parent_slug) {
-				add_submenu_page( $this->parent_slug, $this->menu_name, $this->menu_name, $this->capability, $this->menu_slug,  array(&$this,'page') );
+				add_submenu_page( $this->parent_slug, $this->page_title, $this->menu_name, $this->capability, $this->menu_slug,  array(&$this,'page') );
 			}
 		}
 		
@@ -124,7 +126,7 @@ if(!class_exists('EasyOptions')) {
 			}
 			else {
 			?>
-			<h2><?php echo $this->menu_name;?></h2>
+			<h2><?php echo $this->page_title;?></h2>
 		<?php } 
 			if(isset($_GET['settings-updated'])) { ?>
 			<div id="setting-error-settings_updated" class="updated settings-error"> 
@@ -161,7 +163,7 @@ if(!class_exists('EasyOptions')) {
 		if($this->add_tab) {
 			$tab[] = array(
 			'slug'=>$this->menu_slug,
-			'name'=>$this->menu_name
+			'name'=>$this->page_title
 			);
 		}
 		return $tab;
