@@ -1,4 +1,4 @@
-Easy Options v1.3
+Easy Options v1.4
 =====================
 
 WordPress plugin options / theme options made easy. 
@@ -13,6 +13,12 @@ WordPress plugin options / theme options made easy.
 * Flexible menu location. Where you want to place the menu for options page is your choice.
 * Each option group is saved in one row of wp_options table, no wasting your database.
 
+## Cangelog
+
+1.4
+* fix double messages if setting is more than 1 tab.
+* add version number to class name
+* add init() method
 
 ## Get Started
 
@@ -23,7 +29,7 @@ WordPress plugin options / theme options made easy.
 
 ```
 <?php
-require_once('inc/easy-options.php')
+require_once('Easy-Options/easy-options.php')
 ?>
 ```
 
@@ -44,7 +50,7 @@ $args = Array(
 #### 3. Call EasyOptions
 
 ```
-$my_options   = new EasyOptions($args);
+$my_options   = new EasyOptions_1_4($args);
 ```
 
 #### 4. Create Fields

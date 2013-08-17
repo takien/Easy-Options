@@ -2,14 +2,15 @@
 /**
 	* @name   : Easy Options
 	* @author : takien
-	* @version: 1.3.1
+	* @version: 1.4
 	* @link   : http://takien.com
+	* @url    : https://github.com/takien/Easy-Options
 	* 
  */
 defined('ABSPATH') or die();
 
-if(!class_exists('EasyOptions')) {
-	class EasyOptions {
+if(!class_exists('EasyOptions_1_4')) {
+	class EasyOptions_1_4 {
 
 
 	var $group           = '';
@@ -19,7 +20,7 @@ if(!class_exists('EasyOptions')) {
 	var $fields          = Array();
 	var $default         = Array();
 	var $menu_location   = 'add_menu_page';
-	var $capability 	 = 'edit_theme_options';
+	var $capability      = 'edit_theme_options';
 	var $parent_slug     = '';
 	var $icon_small      = '';
 	var $icon_big        = '';
@@ -30,18 +31,23 @@ if(!class_exists('EasyOptions')) {
 	public function __construct($args=array()) {
 		add_action('admin_init',array(&$this,'register_setting'));
 		add_action('admin_menu',array(&$this,'add_page'));
-		
 		foreach($args as $key=>$val) {
 			
 			if(isset($this->$key)) {
 				$this->$key = $val;
 			}
 		}
+		if(!$this->parent_slug) {
+			$this->init();
+		}
 		$this->page_title = $this->page_title ? $this->page_title : $this->menu_name;
 		add_filter($this->tab_nav(),array(&$this,'tab'));
 		
 	}
 	
+	function init() {
+	
+	}
 
 	/*register setting*/
 	function register_setting() {
@@ -128,7 +134,7 @@ if(!class_exists('EasyOptions')) {
 			?>
 			<h2><?php echo $this->page_title;?></h2>
 		<?php } 
-			if(isset($_GET['settings-updated'])) { ?>
+			if(isset($_GET['settings-updated']) AND ('add_options_page' !== $this->menu_location)) { ?>
 			<div id="setting-error-settings_updated" class="updated settings-error"> 
 				<p><strong>Settings saved.</strong></p>
 			</div>
@@ -153,7 +159,6 @@ if(!class_exists('EasyOptions')) {
 		<?php 
 			echo apply_filters('easy_option_'.$this->menu_slug.'_after_form','');
 		?>
-		<p>To retrieve value in your theme or plugin, use <code>&lt;?php echo easy_options('FIELD_NAME','<?php echo $this->group;?>');?&gt;</code>, example: <code>&lt;?php echo easy_options('facebook_page','<?php echo $this->group;?>');?&gt;</code></p>
 		
 	</div>
 	<?php
@@ -180,7 +185,7 @@ if(!class_exists('EasyOptions')) {
 	 * Render form
 	 * @param array 
 	 */	
-	private function form($fields){
+	function form($fields){
 		$output ='<table class="form-table">';
 		foreach($fields as $field){
 			$field['rowclass'] = isset($field['rowclass']) ? $field['rowclass'] : false;
