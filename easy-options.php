@@ -323,7 +323,7 @@ if (!function_exists('array_replace_recursive'))
 if( !function_exists('easy_options') ) {
 	function easy_options( $option='', $group = '' ) {
 		if( $option ) {
-			$opt = new EasyOptions;
+			$opt = new EasyOptions_1_4;
 			return $opt->option( $option, $group );
 		}
 	}
