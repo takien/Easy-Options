@@ -9,8 +9,10 @@
  */
 defined('ABSPATH') or die();
 
-if(!class_exists('EasyOptions_2')) {
-	class EasyOptions_2 {
+if(!class_exists('EasyOptions_1_5')) {
+	class EasyOptions_1_5 {
+		var $plugin_name  = '';
+		var $plugin_slug  = '';
 		var $defaults = Array(
 				'group'           => '',
 				'menu_name'       => '',
@@ -38,23 +40,10 @@ if(!class_exists('EasyOptions_2')) {
 					
 			
 			add_filter($this->tab_nav(),array(&$this,'tab'),200);
-			
-			/* foreach($args as $key=>$val) {
-				if(isset($this->$key)) {
-					$this->$key = $val;
-				}
-			} */
-
-			//$this->settings
-			//$this->add_settings = $this->add_settings();
-			//array_push($this->settings, $this->add_settings());
-			/* $this->fields = $this->fields();
-			
-			if(!$this->parent_slug) {
-				$this->init();
-			}
-			$this->page_title = $this->page_title ? $this->page_title : $this->menu_name;
-			add_filter($this->tab_nav(),array(&$this,'tab')); */
+			$this->init();
+		}
+		
+		function init() {
 		}
 		
 		function add_admin_menu($menu) {
@@ -144,8 +133,6 @@ if(!class_exists('EasyOptions_2')) {
 		//page
 		function page(){
 			global $plugin_page;
-/* 			echo $this->tab_nav();
-				echo '<hr/>'; */
 		foreach( $this->admin_menu as $menu ) {
 			extract ( $menu );
 			
@@ -210,7 +197,7 @@ if(!class_exists('EasyOptions_2')) {
 		* Unique tab group name
 		*/
 		function tab_nav() {
-			return 'easy_options_tabs_plugin-demo-slug';
+			return 'easy_options_tabs_'.$this->plugin_slug;
 		}
 		
 		/*tab*/

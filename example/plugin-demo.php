@@ -18,12 +18,14 @@ Author URI: http://takien.com/
 //include the class
 require_once(dirname(__FILE__).'/options/easy-options.php');
 
-//make your plugin class, extends EasyOptions_2
+//make your plugin class, extends EasyOptions_1_5
 
-class PluginDemo extends EasyOptions_2 {
-
+class PluginDemo extends EasyOptions_1_5 {
 	
-	//some setting must be in start() method.
+	var $plugin_name = 'Plugin Demo';
+	var $plugin_slug = 'plugin-demo';
+	
+	//setting configuration must be in start() method.
 	function start() {
 		//create admin menu named Plugin Demo
 		$admin_menu = Array(
