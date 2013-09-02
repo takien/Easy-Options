@@ -25,6 +25,21 @@ class PluginDemo extends EasyOptions_1_5 {
 	var $plugin_name = 'Plugin Demo';
 	var $plugin_slug = 'plugin-demo';
 	
+	//this will be called during init
+	function init() {
+		add_filter('the_content', array(&$this, 'plugin_demo_content'));
+	}
+	
+	function plugin_demo_content($content) {
+		$append = '<div class="after-content"><ul>';
+		$append .= '<li>Name: '. $this->option('name',  'plugin-demo-settings', 'NAME NOT SET').'</li>';
+		$append .= '<li>Gender: '. $this->option('gender',  'plugin-demo-settings', 'GENDER NOT SET').'</li>';
+		$append .= '<li>About: '. nl2br($this->option('about',  'plugin-demo-settings', 'MESSAGE NOT SET')).'</li>';
+		
+		$append .= '</ul></div>';
+		
+		$content = $content.$append;
+	}
 	//setting configuration must be in start() method.
 	function start() {
 		//create admin menu named Plugin Demo
@@ -67,8 +82,8 @@ class PluginDemo extends EasyOptions_1_5 {
 				'description' => 'Your sex' 
 				),
 				Array(
-				'name'         => 'About you',  
-				'label'        => 'about', 
+				'name'         => 'about',  
+				'label'        => 'About you', 
 				'type'         => 'textarea',  
 				'value'        => '',
 				'description' => 'About yourself'
