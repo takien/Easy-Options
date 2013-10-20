@@ -2,15 +2,15 @@
 /**
 	* @name   : Easy Options
 	* @author : takien
-	* @version: 1.5
+	* @version: 1.6
 	* @link   : http://takien.com
 	* @url    : https://github.com/takien/Easy-Options
 	* 
  */
 defined('ABSPATH') or die();
 
-if(!class_exists('EasyOptions_1_5')) {
-	class EasyOptions_1_5 {
+if(!class_exists('EasyOptions_1_6')) {
+	class EasyOptions_1_6 {
 		var $plugin_name  = '';
 		var $plugin_slug  = '';
 		var $defaults = Array(
@@ -27,23 +27,29 @@ if(!class_exists('EasyOptions_1_5')) {
 				'icon_big'        => '',
 				'menu_position'   => 85,
 				'add_tab'         => false,
+				'image_field'     => false,
+				'actions'         => Array(),
 			);
 		var $admin_menu     = Array();
 		var $add_menu       = Array();
 		var $fields         = Array();
+		var $page = '';
 		
 		//costruct
 		public function __construct($args=array()) {
 			
 			add_action( 'admin_init',array(&$this,'register_setting') );
 			add_action( 'admin_menu',array(&$this,'add_page') );
-					
 			
+			$page = $this->page;
+
 			add_filter($this->tab_nav(),array(&$this,'tab'),200);
 			$this->init();
 		}
 		
+
 		function init() {
+			
 		}
 		
 		function add_admin_menu($menu) {
@@ -71,6 +77,7 @@ if(!class_exists('EasyOptions_1_5')) {
 		/*option*/
 		function option($key='',$group='',$default=''){
 			$option = get_option($group);
+			
 			$return = '';
 			if($key){
 				if(isset($option[$key]) AND !empty($option[$key])){
@@ -108,26 +115,90 @@ if(!class_exists('EasyOptions_1_5')) {
 				'add_options_page'  
 			);
 			foreach( $this->admin_menu as $menu ) {
-			
+				$page     = $actions = '';
 				extract ( $menu );
+				
+				$unique = preg_replace('/[^0-9]+/','',md5($menu_slug));
+				$menu_position = strpos($menu_position,'.') ? $menu_position.$unique : $menu_position.'.'.$unique ;
+
+				$callback = Array('priority','function');
+				
 				if(in_array($menu_location,$top_menu)){
-					call_user_func($menu_location, $page_title, $menu_name, $capability, $menu_slug, array(&$this,'page'), $icon_small, $menu_position);
+					$page = call_user_func($menu_location, $page_title, $menu_name, $capability, $menu_slug, array(&$this,'page'), $icon_small, $menu_position);
 				}
 				else if (in_array($menu_location, $specific_sub_menu)){
-					call_user_func($menu_location, $page_title, $menu_name, $capability, $menu_slug, array(&$this,'page'));
+					$page = call_user_func($menu_location, $page_title, $menu_name, $capability, $menu_slug, array(&$this,'page'));
 				}
 				else if(strpos($menu_location,'post_type') === 0){
 					$post_type = end(explode('=',$menu_location));
-					add_submenu_page( "edit.php?post_type=$post_type", $page_title, $menu_name, $capability, $menu_slug,  array(&$this,'page') );
+					$page = add_submenu_page( "edit.php?post_type=$post_type", $page_title, $menu_name, $capability, $menu_slug,  array(&$this,'page') );
 				}
 				else  {
 					if($parent_slug) {
-						add_submenu_page( $parent_slug, $page_title, $menu_name, $capability, $menu_slug,  array(&$this,'page') );
+						$page = add_submenu_page( $parent_slug, $page_title, $menu_name, $capability, $menu_slug,  array(&$this,'page') );
 					}
 				}
-				
+				if( $image_field ) {
+					add_action( "admin_print_scripts-$page", 'wp_enqueue_media');
+					add_action( "admin_head-$page", array(&$this, 'scripts_upload_head'));
+				}
+				foreach ( (array)$actions as $action_name => $callbacks ) {
+					foreach( (array)$callbacks as $callback ) {
+						if( !empty ($callback['function']) AND is_callable(array(&$this, $callback['function'])) ) {
+							add_action( "$action_name-$page", array(&$this, $callback['function']), isset($callback['priority']) ? $callback['priority'] : false );
+						}
+					}
+				}
 			}
 			
+		}
+		
+		function scripts_upload_head() {
+			?>
+			<script type="text/javascript">
+			/* <![CDATA[ */	
+			(function($) {
+			var imageframe,
+			loading = '<?php echo admin_url('images/loading.gif');?>';
+			$( function() {
+				$('.easy-options-choose-file').each(function() {
+				var $el = $(this);
+				$el.click( function( event ) {
+					
+					$($el.data('image-container')).attr('src',loading);
+					event.preventDefault();
+					imageframe = wp.media.frames.customHeader = wp.media({
+						title: $el.data('choose'),
+						library: {
+							type: 'image'
+						},
+
+						button: {
+							text: $el.data('update'),
+							close: true
+						}
+					});
+					imageframe.on( 'select', function() {
+						var attachment = imageframe.state().get('selection').first().toJSON(),
+							image_container = $el.data('image-container'),
+							image_url_val   = $el.data('image-url-to-value');
+							
+							$(image_container).attr('src',attachment.url);
+							$(image_url_val).val(attachment.url);
+					});
+					
+					if ( imageframe ) {
+						imageframe.open();
+						return;
+					}
+					imageframe.open();
+				});
+				});
+			});
+			}(jQuery));
+			/* ]]> */
+			</script>
+				<?php
 		}
 		
 		//page
@@ -161,7 +232,7 @@ if(!class_exists('EasyOptions_1_5')) {
 						<p><strong>Settings saved.</strong></p>
 					</div>
 					<?php }
-					echo apply_filters('easy_option_'.$menu_slug.'_before_form','');
+					do_action('easy_option_'.$menu_slug.'_before_form');
 					if( $page_callback AND is_callable( $this->$page_callback() ) ) {
 						call_user_func ( $this->$page_callback() );
 					}
@@ -185,7 +256,7 @@ if(!class_exists('EasyOptions_1_5')) {
 					</form>
 					<?php 
 					}
-					echo apply_filters('easy_option_'.$menu_slug.'_after_form','');
+					do_action('easy_option_'.$menu_slug.'_after_form');
 				?>
 				
 			</div>
@@ -239,16 +310,36 @@ if(!class_exists('EasyOptions_1_5')) {
 				);
 
 				extract ( $this->merge($pairs, $field) );
-			
+				
+				
 				if ( $type == 'checkbox' ) {
-					$attr = $attr. ' '.(($value) ? 'checked="checked"' : '');
+					if( $this->option($name,$group) ) {
+						$attr = ' checked="checked" ';
+					}
 				}
 				
-				$value = $this->option( $name,$group,$value );
 				
-				$name  = $group.'['.$name.']';
+				/* check if name cotain array [] */
+				$names = explode('[', $name, 2);
+				if(isset ($names[1])) {
+					$value = $this->option( $names[0],$group,$value );
+					
+					$name  = $group.'['.$names[0].']['.$names[1];
+					
+				}
+				else {
+					$value = $this->option( $name,$group,$value );
+					
+					$name  = $group.'['.$name.']';
+					
+				}
 				
+				if (is_array($value )) {
+					$index = intval(end(explode('[',$name)));
+					$value = isset($value[$index]) ? $value[$index] : '';
+				}
 				
+				$id = str_replace( Array('[',']'),Array('-','-'),$name );
 				//dropdown pages
 				if($type == 'dropdown_pages') {
 					$values = $this->dropdown_pages();
@@ -256,17 +347,17 @@ if(!class_exists('EasyOptions_1_5')) {
 				
 				if($type=='textarea'){
 						$output .= '<tr><th><label for="'.$name.'">'.$label.'</label></th>';
-						$output .= '<td style="vertical-align:top"><textarea '.($style ? $style : 'style="width:400px;height:150px"').' id="'.$name.'" name="'.$name.'">'.esc_textarea($value).'</textarea>';
+						$output .= '<td style="vertical-align:top"><textarea '.$attr.' '.($style ? $style : 'style="width:400px;height:150px"').' id="'.$id.'" name="'.$name.'">'.esc_textarea($value).'</textarea>';
 						$output .= ' <p class="description">'.$description.'</p></td></tr>';
 				}
 				if($type=='text'){
 					$output .= '<tr '.($rowclass ? 'class="'.$rowclass.'"': '').'><th><label for="'.$name.'">'.$label.'</label></th>';
-					$output .= '<td><input class="regular-text" type="text" id="'.$name.'" name="'.$name.'" value="'.$value.'" />';
+					$output .= '<td><input class="regular-text" type="text" id="'.$id.'" name="'.$name.'" value="'.$value.'" '.$attr.'/>';
 					$output .= ' <p class="description">'.$description.'</p></td></tr>';
 				}
 				if($type=='checkbox'){
 					$output .= '<tr '.($rowclass ? 'class="'.$rowclass.'"': '').'><th><label for="'.$name.'">'.$label.'</label></th>';
-					$output .= '<td><input type="hidden" name="'.$name.'" value="" /><input type="checkbox" id="'.$name.'" name="'.$name.'" value="1" '.$attr.' />';
+					$output .= '<td><input type="hidden" name="'.$name.'" value="" /><input type="checkbox" id="'.$id.'" name="'.$name.'" value="1" '.$attr.' />';
 					$output .= ' <p class="description">'.$description.'</p></td></tr>';
 				}
 				if($type=='checkboxgroup'){
@@ -306,6 +397,18 @@ if(!class_exists('EasyOptions_1_5')) {
 					$output .= '</select>';
 					$output .= ' <p class="description">'.$description.'</p></td></tr>';
 				}
+				if( $type=='image' ){
+					$output .= '<tr '.($rowclass ? 'class="'.$rowclass.'"': '').'><th><label for="'.$name.'">'.$label.'</label></th>';
+					$output .= '<td><img style="display:block;max-width:300px;height:auto" src="'.($value ? $value : 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==').'" id="'.$id.'-image-container" /><input class="regular-text" type="text" id="'.$id.'" placeholder="image URL here" name="'.$name.'" value="'.$value.'" />';
+					$output .= ' or <a class="easy-options-choose-file button"
+						data-image-container="#'.$id.'-image-container"
+						data-image-url-to-value="#'.$id.'"
+						data-choose="Choose Image"
+						data-update="Set Image">Choose image</a>';
+					$output .= ' <p class="description">'.$description.'</p></td></tr>';
+				}
+				
+	
 			}
 			$output .= '</table>';
 			return $output;

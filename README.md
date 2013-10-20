@@ -1,4 +1,4 @@
-Easy Options v1.5
+Easy Options v1.6
 =====================
 
 WordPress plugin options / theme options made easy. 
@@ -9,11 +9,19 @@ WordPress plugin options / theme options made easy.
 * Unlimited options page
 * Support tabbed options page
 * Custom icon
-* Various field types: `checkbox`, `checkboxgroup`, `text`, `textarea`, `dropdown_pages`.
+* Various field types: `checkbox`, `checkboxgroup`, `text`, `textarea`, `dropdown_pages`, `image`.
 * Flexible menu location. Where you want to place the menu for options page is your choice.
 * Each option group is saved in one row of wp_options table, no wasting your database.
 
 ## Changelog
+
+1.6
+
+* Change `apply_filters` to `do_action` hook before and after form
+* Add actions to $defaults property, so that it will be easier to specify where actions should be fired. (eg, on current plugin page only)
+* Add field type image (using builtin plupload upload method)
+* Prevent menu_position conflicts with another plugin
+* Now you can use multiple field name, eg photo[], this will return array on output.
 
 1.5
 

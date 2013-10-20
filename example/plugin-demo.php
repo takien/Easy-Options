@@ -8,6 +8,7 @@ Version: 0.1
 Author URI: http://takien.com/
 */
 
+
 /*
 * This is only sample plugin, you can edit it, comments each line will help you.
 * this plugin allows you to insert some text after post content.
@@ -18,12 +19,14 @@ Author URI: http://takien.com/
 //include the class
 require_once(dirname(__FILE__).'/options/easy-options.php');
 
-//make your plugin class, extends EasyOptions_1_5
+//make your plugin class, extends EasyOptions_1_6
 
-class PluginDemo extends EasyOptions_1_5 {
+class PluginDemo extends EasyOptions_1_6 {
 	
-	var $plugin_name = 'Plugin Demo';
-	var $plugin_slug = 'plugin-demo';
+	var $plugin_name    = 'Plugin Demo';
+	var $plugin_slug    = 'plugin-demo';
+	var $plugin_version = 0.1;
+	
 	
 	//this will be called during init
 	function init() {
@@ -31,14 +34,17 @@ class PluginDemo extends EasyOptions_1_5 {
 	}
 	
 	function plugin_demo_content($content) {
+		
 		$append = '<div class="after-content"><ul>';
 		$append .= '<li>Name: '. $this->option('name',  'plugin-demo-settings', 'NAME NOT SET').'</li>';
 		$append .= '<li>Gender: '. $this->option('gender',  'plugin-demo-settings', 'GENDER NOT SET').'</li>';
 		$append .= '<li>About: '. nl2br($this->option('about',  'plugin-demo-settings', 'MESSAGE NOT SET')).'</li>';
-		
+		$append .= '<li>Photo: <img src="'.$this->option('photo',  'plugin-demo-settings', '').'" /></li>';
 		$append .= '</ul></div>';
-		
-		$content = $content.$append;
+		if($this->option('place_after_content',  'plugin-demo-settings', '')) {
+			$content = $content.$append;
+		}
+		return $content;
 	}
 	//setting configuration must be in start() method.
 	function start() {
@@ -55,13 +61,49 @@ class PluginDemo extends EasyOptions_1_5 {
 			//'parent_slug'   => '',       //if this is first/top menu, you can skip it.
 			'icon_small'      => '',       //URL to image/icon to be displayed on the menu, size 16x16px. if not set, default gear icon will be used.
 			'icon_big'        => plugins_url( 'options/images/icon-setting-large.png' , __FILE__  ),       //URL to image/icon to be displayed on the page, size 32x32px.
-			'menu_position'   => 85,       //position/order, only for top menu. see here for more. http://codex.wordpress.org/Function_Reference/add_menu_page#Menu_Positions
+			'menu_position'   => 85.4,       //position/order, only for top menu. Use decimal value to ensure not conflict with another plugin. see here for more: http://codex.wordpress.org/Function_Reference/add_menu_page#Menu_Positions
 			'add_tab'         => true,    //set true if you want to tabbed menu. must be true if your menu more than one (contains sub menu).
+			'image_field'     => true,   // set true to enable upload functionality, if your field contains 'image' type. Internally it will enqueue necesarry upload scripts for you.
+			/*
+			The following actions will be loaded on the current plugin page.
+			To add_action globally, eg on front page, you should add it on init() method on this Class.
+			
+			'actions'          => Array(
+ 				'admin_print_scripts' => Array(
+					Array(
+						'function' => '', // what script to load? jqueryui? place it here
+						'priority' => ''
+					),
+				),
+  				'admin_print_styles' => Array(
+					Array(
+						'function' => '', // this to print style (inline style on the admin_head),callback must exists as a method on this class.
+						'priority' => ''
+					),
+				),
+
+				'admin_head'        => Array(
+					Array(
+						'function' => '', // this to print style (inline style on the admin_head), callback must exists as a method on this class.
+					)
+				),
+				'admin_footer'      => Array(), //list of function name
+				'help'              => Array(), //list of function name
+			)
+			*/
+			
 			);
 		$this->add_admin_menu($admin_menu);
-		
+
 		//lets create some fields
 		$fields = Array(
+			Array(
+				'name'         => 'place_after_content',  
+				'label'        => 'Add this bio after content',
+				'type'         => 'checkbox', 
+				//'value'        => '1',     
+				'description' => 'Check to append this bio to post content.'
+				),
 			Array(
 				'name'         => 'name',  //whatever you want.
 				'label'        => 'Your name please', //label
@@ -81,14 +123,22 @@ class PluginDemo extends EasyOptions_1_5 {
 				), 
 				'description' => 'Your sex' 
 				),
-				Array(
+			Array(
 				'name'         => 'about',  
 				'label'        => 'About you', 
 				'type'         => 'textarea',  
 				'value'        => '',
 				'description' => 'About yourself'
 				),
-			
+			Array(
+				'name'         => 'photo',  
+				'label'        => 'Photo', 
+				'type'         => 'image',
+				'value'        => '',
+				'multiple'     => false,
+				'description'  => ''
+				),
+						
 			);
 		//add fields, first param is 'group', must be matched to the group name we have created above..
 		$this->add_fields('plugin-demo-settings',$fields);
@@ -108,15 +158,18 @@ class PluginDemo extends EasyOptions_1_5 {
 			'icon_big'        => plugins_url( 'options/images/icon-setting-large.png' , __FILE__  ),       //URL to image/icon to be displayed on the page, size 32x32px.
 			//'menu_position'   => 85,       //position/order, only for top menu. see here for more. http://codex.wordpress.org/Function_Reference/add_menu_page#Menu_Positions
 			'add_tab'         => true,    //set true if you want to tabbed menu. must be true if your menu more than one (contains sub menu).
+			
 			);
 		$this->add_admin_menu( $admin_menu2 );		
 	}
 	
+
 	function about_plugin_demo() { //this callback function will be called in second tab
 		?>	
+
 			<p>
-			Plugin name: <strong>Plugin Demo</strong><br>
-			Version: <strong>0.1</strong><br>
+			Plugin name: <strong><?php echo $this->plugin_name;?></strong><br>
+			Version: <strong><?php echo $this->plugin_version;?></strong><br>
 			Author: <strong>takien</strong>
 			Author URL: <a href="http://takien.com">http://takien.com</a>
 			</p>
@@ -127,6 +180,5 @@ class PluginDemo extends EasyOptions_1_5 {
 	}
 }
 
-$plgn = new PluginDemo;
-$plgn->start();
-
+$pluginDemo = new PluginDemo;
+$pluginDemo->start();
