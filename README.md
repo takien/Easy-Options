@@ -1,4 +1,4 @@
-Easy Options v1.6
+Easy Options v1.6.1
 =====================
 
 WordPress plugin options / theme options made easy. 
@@ -14,6 +14,11 @@ WordPress plugin options / theme options made easy.
 * Each option group is saved in one row of wp_options table, no wasting your database.
 
 ## Changelog
+
+1.6.1
+
+* Image field loading indicator fix
+* Add new option `existing_page`, to embed page that already exists to tab menu (eg. edit taxonomy page)
 
 1.6
 
