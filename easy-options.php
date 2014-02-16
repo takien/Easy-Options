@@ -2,15 +2,15 @@
 /**
 	* @name   : Easy Options
 	* @author : takien
-	* @version: 1.6
+	* @version: 1.6.1
 	* @link   : http://takien.com
 	* @url    : https://github.com/takien/Easy-Options
 	* 
  */
 defined('ABSPATH') or die();
 
-if(!class_exists('EasyOptions_1_6')) {
-	class EasyOptions_1_6 {
+if(!class_exists('EasyOptions_1_6_1')) {
+	class EasyOptions_1_6_1 {
 		var $plugin_name  = '';
 		var $plugin_slug  = '';
 		var $defaults = Array(
@@ -22,6 +22,7 @@ if(!class_exists('EasyOptions_1_6')) {
 				'fields'          => Array(),
 				'menu_location'   => 'add_menu_page',
 				'capability'      => 'edit_theme_options',
+				'existing_page'   => false,
 				'parent_slug'     => '',
 				'icon_small'      => '',
 				'icon_big'        => '',
@@ -123,19 +124,26 @@ if(!class_exists('EasyOptions_1_6')) {
 
 				$callback = Array('priority','function');
 				
+				if( $existing_page ) {
+					$menu_callback = false;
+				}
+				else {
+					$menu_callback = array(&$this,'page');
+				}
+				
 				if(in_array($menu_location,$top_menu)){
-					$page = call_user_func($menu_location, $page_title, $menu_name, $capability, $menu_slug, array(&$this,'page'), $icon_small, $menu_position);
+					$page = call_user_func($menu_location, $page_title, $menu_name, $capability, $menu_slug, $menu_callback, $icon_small, $menu_position);
 				}
 				else if (in_array($menu_location, $specific_sub_menu)){
-					$page = call_user_func($menu_location, $page_title, $menu_name, $capability, $menu_slug, array(&$this,'page'));
+					$page = call_user_func($menu_location, $page_title, $menu_name, $capability, $menu_slug, $menu_callback);
 				}
 				else if(strpos($menu_location,'post_type') === 0){
 					$post_type = end(explode('=',$menu_location));
-					$page = add_submenu_page( "edit.php?post_type=$post_type", $page_title, $menu_name, $capability, $menu_slug,  array(&$this,'page') );
+					$page = add_submenu_page( "edit.php?post_type=$post_type", $page_title, $menu_name, $capability, $menu_slug,  $menu_callback );
 				}
 				else  {
 					if($parent_slug) {
-						$page = add_submenu_page( $parent_slug, $page_title, $menu_name, $capability, $menu_slug,  array(&$this,'page') );
+						$page = add_submenu_page( $parent_slug, $page_title, $menu_name, $capability, $menu_slug,  $menu_callback );
 					}
 				}
 				if( $image_field ) {
@@ -165,7 +173,7 @@ if(!class_exists('EasyOptions_1_6')) {
 				var $el = $(this);
 				$el.click( function( event ) {
 					
-					$($el.data('image-container')).attr('src',loading);
+					
 					event.preventDefault();
 					imageframe = wp.media.frames.customHeader = wp.media({
 						title: $el.data('choose'),
@@ -182,7 +190,7 @@ if(!class_exists('EasyOptions_1_6')) {
 						var attachment = imageframe.state().get('selection').first().toJSON(),
 							image_container = $el.data('image-container'),
 							image_url_val   = $el.data('image-url-to-value');
-							
+							$($el.data('image-container')).attr('src',loading);
 							$(image_container).attr('src',attachment.url);
 							$(image_url_val).val(attachment.url);
 					});
@@ -218,7 +226,13 @@ if(!class_exists('EasyOptions_1_6')) {
 						if(is_array($navs)){
 							foreach($navs as $nav){
 								$class = ( $nav['slug'] == $plugin_page ) ? ' nav-tab-active' : '';
-								echo '<a class="nav-tab '.$class.'" href="?page='.$nav['slug'].'">'.$nav['name'].'</a>';
+								//*added  20,11,2013
+								if(strpos($nav['slug'],'.php')) {
+									echo '<a class="nav-tab '.$class.'" href="'.$nav['slug'].'">'.$nav['name'].'</a>';
+								}
+								else {
+									echo '<a class="nav-tab '.$class.'" href="?page='.$nav['slug'].'">'.$nav['name'].'</a>';
+								}
 							}
 						}
 						echo '</h2>';

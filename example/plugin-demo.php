@@ -19,9 +19,9 @@ Author URI: http://takien.com/
 //include the class
 require_once(dirname(__FILE__).'/options/easy-options.php');
 
-//make your plugin class, extends EasyOptions_1_6
+//make your plugin class, extends EasyOptions_1_6_1
 
-class PluginDemo extends EasyOptions_1_6 {
+class PluginDemo extends EasyOptions_1_6_1 {
 	
 	var $plugin_name    = 'Plugin Demo';
 	var $plugin_slug    = 'plugin-demo';
